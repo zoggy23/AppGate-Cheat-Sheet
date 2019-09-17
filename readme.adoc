@@ -1,0 +1,135 @@
+= AppGate SDP Cheat-Sheet
+:doctype: book
+:encoding: utf-8
+:lang: en
+:toc:
+
+== Deamons log level
+
+* :#>cz-setup 
+change log levels
+	INFO|DEBUG
+
+* :#>service <daemon-name>
+	status|start|stop|restart
+
+== Database
+:$> sudo -u postgres psql 
+
+* postgres=# \list (list DBs)
+* postgres=# \connect <db>
+* postgres=# \dt  (list tables)
+
+== Version
+* cat /usr/share/cz-image/version
+
+== Rollback
+:$>sudo reboot -> select boot partition in GRUB
+
+== Network
+* :$> ip addr -> List interfaces -> Snoop interface traffic ethX, user tunX traffic
+* :#>tcpdump –i <if> [host:H][port:P]
+  -w /mnt/data/tmp/f -> Write to file f
+  -F <file> -> Use <file> as input
+  
+== Public IP
+* :$>curl ipecho.net/plain
+
+== IPtables
+* :#>cz-iptables <?> save  (save custom rules)
+                   flush (remove custom rules)
+                   diff  (display custom rules)
+== Json 
+* :$>jq . <file>
+
+== Reachability
+* :$>curl –kL https://<host>:444
+* :$>nc –zv <host> 444
+
+== Backup and Restore
+* :$>sudo cz-backup <file-name>
+* :$>sudo cz-restore <file-name>
+
+== Verify time of device (otp)
+* https://time.is
+
+== File system
+* /
+* |-home 
+* |---cz <non persistent> home dir
+* |-----seed.json Appliance seeding
+* |-etc  Dir of configurations
+* |---cz-<daemon> cz-daemon config files
+* |---nginx nginx config
+* |---rsyslog syslog config
+* |-mnt Persistent
+* |---data <permanent partition>
+* |-----log Dir of log files
+* |-----download Client download files
+* |-----tmp Work space
+* |---state <permanent partition>
+* |-----pki Certificates, CA
+* |-----config Appliance config
+* |-------current local & remote (ctrl)
+* |---------compiled Actual appliance conf
+* |-------previous Before last change
+ 	
+== DNS
+* IdP	Set on the adapter on the client, used by the OS of the client. Resolvers differ on OS & OS-versions. Need also a entitlement.
+* Site	Resolves hostnames to IPs, used on the gateway.
+* Appliance	Used for the appliance operation, working with 3d party systems like radius and AD.
+
+== Cloud resolvers
+* aws://
+	security-group:<NAME>
+  tag-key:<NAME>
+  tag-value:<NAME>
+  tag:<KEY>=<VALUE>
+* azure://	network-security-group:<NAME>
+  tag-key:<NAME>
+  tag-value:<NAME>
+  tag:<KEY>=<VALUE>
+
+== VPNd
+* :#> vpn-console [OPTIONS]
+
+== Daemons
+* Appliance 
+  ** configd	Appliance config & seeding. Relates: managed
+	** proxyd	Switchboard #1:{HTTPS,vpnd}; load balancing vpnd’s. 
+	** nginx	Switchboard #2:{UI, cz-daemon}
+	** rsyslog	Combines all logs.
+	** logd	Forwards local rsyslog to remote; receiver on logserver. 
+	** cz-ffwd	Forwards audit-logs from cz-logd and forwards messages securely to cz-logd on logserver.
+	** cz-logd	Gathers the audit-logs from all the daemons running on the Appliance, and forwards then to rsyslog and logserver.
+	** ssh	Handles ssh connections to the Appliance.
+              
+* Controller	controllerd	Handles all the authentication, authorization, Entitlements, Policies & Conditions, tokens, etc.
+
+* Gateway	    
+  ** Vpnd	Fw engine, creates tun device; 
+	** Sessiond	  Handles entitlements, client claims, generates fw-rules. Relates: named
+	** Named	    Translate names to IP: {DNS,aws, azure}
+	** Had	      Client on appliance fail-over: {ipv4:arp, ipv6:ND}
+  
+* Audit log 	
+  ** logd	parses the audit-logs and inserts them into elasticsearch.
+	** Elastic	Database and processing.
+	** Kibana	Audit log front end.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
